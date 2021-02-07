@@ -5,10 +5,10 @@
 
 Compute store numbers as a sequence of bits. Every bit represents a number:
 
-- First bit is 1 (2⁰)
-- Second bit is 2 (2¹)
-- Third bit is 4 (2²)
-- Fourth bit is 8 (2³)
+- First bit is 2⁰ = 1
+- Second bit is 2¹ = 2
+- Third bit is 2² = 4
+- Fourth bit is 2³ = 8
 - ...
 
 To construct the number 6 we'll represent is at 4(2²) + 2(2¹).
