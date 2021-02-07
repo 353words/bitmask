@@ -40,12 +40,14 @@ These operators work on more than one bit at a time. To calculate 5&3 do the fol
 - Represent them as bits: 5 -> 00000101, 3 -> 00000011
 - Calculate AND between bits in the same position
 
-    00000101
-    00000011
-    --------
-    00000001
+```
+00000101
+00000011
+--------
+00000001
+```
 
-Which means 5&3 = 0.
+Which means that `5&3 = 0`.
     
 
 Using these operators we can do pretty complex logic. In our case we'll use them to set/unset bits and check is a bit is set.
