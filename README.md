@@ -19,22 +19,22 @@ _Note: A fun exercise with kids is to teach them to count up to 31 on one hand. 
 We also define logic operations on bits:
 
 AND (`&`) is true only if two bits are 1: 
-- 0 & 0 -> 0
-- 0 & 1 -> 0
-- 1 & 0 -> 0
-- 1 & 1 -> 1
+- `0 & 0 -> 0`
+- `0 & 1 -> 0`
+- `1 & 0 -> 0`
+- `1 & 1 -> 1`
 
 OR (`|`) is true if one of the bits is 1:
-- 0 | 0 -> 0
-- 0 | 1 -> 1
-- 1 | 0 -> 1
-- 1 | 1 -> 0
+- `0 | 0 -> 0`
+- `0 | 1 -> 1`
+- `1 | 0 -> 1`
+- `1 | 1 -> 0`
 
 _Note: The bitwise or is different than the "or" we use in English which means either the first bit is 1 or the second. The operator for the English "or" is known as XOR (short for eXclusive OR)._
 
 NOT (`^`) negates the bit
-- ^1 -> 0
-- ^0 -> 1
+- `^1 -> 0`
+- `^0 -> 1`
 
 These operators work on more than one bit at a time. To calculate 5&3 do the following:
 - Represent them as bits: 5 -> 00000101, 3 -> 00000011
