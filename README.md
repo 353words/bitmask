@@ -12,7 +12,7 @@ Compute store numbers as a sequence of bits. Every bit represents a number:
 - ...
 
 To construct the number 6 we'll represent is at 4(2²) + 2(2¹).
-For an 8 bit number, we're using the bit representation of 00000110. There the smallest bit (2⁰ also called LSB - least significant bit) is on the right. We say a bit is "set" is it's value is 1, in 6 the second and third bits are set.
+For an 8 bit number, we're using the bit representation of `00000110`. There the smallest bit (2⁰ also called LSB - least significant bit) is on the right. We say a bit is "set" is it's value is 1, in 6 the second and third bits are set.
 
 _Note: A fun exercise with kids is to teach them to count up to 31 on one hand. Each finger is a bit, where the pinky is 1 and the thumb is 16. Let them giggle at 4 :)_
 
