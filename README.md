@@ -1,5 +1,26 @@
 # Using Bitmasks to Reduce Memory
 
+You're writing an online document system that will rival Google Docs and Microsoft Office.
+Business is going very well and you get a lot of customer, and you start facing performance issues.
+You're servers start to consume a lot of memory, and you start to dig in and see how you can reduce memory consumption.
+
+After some investigation, you find out that the document cache is one of the main memory hogs. 
+Each document has a set of permissions defined as:
+
+**Listing 1: DocumentPermissions struct**
+```
+8 // DocumentPermissions are permissions on a document.
+9 type DocumentPermissions struct {
+10     Locked        bool
+11     GroupReadable bool
+12     GroupWritable bool
+13     AnyReadable   bool
+14     AnyWritable   bool
+15 }
+```
+
+Listing 1 shows the permission set each document has.
+
 
 ## Numbers as Bits
 

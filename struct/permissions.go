@@ -5,6 +5,7 @@ import (
 	"unsafe"
 )
 
+// DocumentPermissions are permissions on a document.
 type DocumentPermissions struct {
 	Locked        bool
 	GroupReadable bool
