@@ -1,8 +1,8 @@
 # Using Bitmasks to Reduce Memory
 
 You're writing an online document system that will rival Google Docs and Microsoft Office.
-Business is going very well and you get a lot of customer, and you start facing performance issues.
-You're servers start to consume a lot of memory, and you start to dig in and see how you can reduce memory consumption.
+Business is going very well and you get a lot of customers, and you start facing performance issues.
+Your servers start to consume a lot of memory, and you start to dig in and see how you can reduce memory consumption.
 
 After some investigation, you find out that the document cache is one of the main memory hogs. 
 Each document has a set of permissions defined as:
@@ -35,7 +35,7 @@ Let's see how much memory `DocumentPermissions` takes:
 
 Listing 2 shows how to measure the size of `DocumentPermissions` in memory. This program will output `5`, which is 5 bytes. Each byte is 8 bits so we use `5*8=40` bits to store this information.
 
-Ideally, every permission flag can use a single bit, it can be either `true` (1) or `false` (0). We have 5 permissions, which mean we can use a single byte, instead of 5, to encode the same information.
+Ideally, every permission flag can use a single bit, it can be either `true` (1) or `false` (0). We have 5 permissions, which means we can use a single byte, instead of 5, to encode the same information.
 
 
 ## Interlude: Numbers as Bits
@@ -93,13 +93,12 @@ SHIFT LEFT (`<<`) moves all bits one to the left.
 ```
 
 Shifting left one place is like multiplying by 2.
-    
 
-Using these operators we can do pretty complex logic. In our case we'll use them to set/unset bits and check is a bit is set.
+Using these operators we can do pretty complex logic. In our case we'll use them to set/unset bits and check if a bit is set.
 
 ## Back to Permissions
 
-We're going to re-define `DocumentPermissions` as a single byte.
+We're going to redefine `DocumentPermissions` as a single byte.
 
 **Listing 3: `DocumentPermissions` as byte**
 
@@ -125,7 +124,7 @@ Next, we're going to define the permissions. Each will be a number with one dist
 13 )
 ```
 
-Listing 4 show the permissions. One line 8, we use `iota` to define the first permission which is `1<<0 = 1`. On lines 8 to 12, Go will carry the same operation and type for the rest of the values. This means `GroupReadable` will be `1<<1 = 2`, `GroupWritable` will be `1<<2 = 4` ...
+Listing 4 shows the permissions. One line 8, we use `iota` to define the first permission which is `1<<0 = 1`. On lines 8 to 12, Go will carry the same operation and type for the rest of the values. This means `GroupReadable` will be `1<<1 = 2`, `GroupWritable` will be `1<<2 = 4` ...
 
 Next we'll define methods on `DocumentPermissions` to set/clear permissions and also to check if a permission is set.
 
@@ -207,8 +206,12 @@ And if we check against `AnyReadable` which is `00001000` then
 
 We managed to reduce the memory consumption of `DocumentPermissions` from 5 bytes to a single byte. It might not seem much, but as Dave Cheney [said](https://dave.cheney.net/2021/01/05/a-few-bytes-here-a-few-there-pretty-soon-youre-talking-real-memory) "A few bytes here, a few there, pretty soon you’re talking real memory."
 
+This technique is well established and is called bitmask, see more [on Wikipedia](https://en.wikipedia.org/wiki/Mask_(computing)).
+
 What's nice about Go's type system is that it allows you to combine low level code such as bitmasks with high level code such as methods to give you both performance and user friendly code.
 
 What tricks did you use to reduce memory? I'd love to hear your stories, ping me at miki@353solutions.com
 
 The code for this blog post can be found [on GitHub](https://github.com/353words/bitmask).
+
+
