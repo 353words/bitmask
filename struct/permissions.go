@@ -15,6 +15,6 @@ type DocumentPermissions struct {
 }
 
 func main() {
-	perms := DocumentPermissions{}
+	var perms DocumentPermissions
 	fmt.Println(unsafe.Sizeof(perms))
 }
