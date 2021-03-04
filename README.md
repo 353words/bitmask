@@ -1,46 +1,19 @@
-# Using Bitmasks to Reduce Memory
+# Using Bitmasks
 
-You're writing an online document system that will rival Google Docs and Microsoft Office.
-Business is going very well and you get a lot of customers, and you start facing performance issues.
-Your servers start to consume a lot of memory, and you start to dig in and see how you can reduce memory consumption.
+You a write server for massively multiplayer online role-playing game ([MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game)).
 
-After some investigation, you find out that the document cache is one of the main memory hogs. 
-Each document has a set of permissions defined as:
+In the game, players collect keys and you want to design how to store the set of keys each player has.
 
-**Listing 1: DocumentPermissions struct**
+Say the keys are `copper`, `jade` and `crystal`. You consider the following options for storing a player key set:
+- A `[]string`
+- A `map[string]bool`
 
-```
-8 // DocumentPermissions are permissions on a document.
-9 type DocumentPermissions struct {
-10     Locked        bool
-11     GroupReadable bool
-12     GroupWritable bool
-13     AnyReadable   bool
-14     AnyWritable   bool
-15 }
-```
-
-Listing 1 shows the permission set each document has.
-
-Let's see how much memory `DocumentPermissions` takes:
-
-**Listing 2: Size of `DocumentPermissions`**
-
-```
-17 func main() {
-18     perms := DocumentPermissions{}
-19     fmt.Println(unsafe.Sizeof(perms))
-20 }
-```
-
-Listing 2 shows how to measure the size of `DocumentPermissions` in memory. This program will output `5`, which is 5 bytes. Each byte is 8 bits so we use `5*8=40` bits to store this information.
-
-Ideally, every permission flag can use a single bit, it can be either `true` (1) or `false` (0). We have 5 permissions, which means we can use a single byte, instead of 5, to encode the same information.
+After considering both options, you decide on a third one - a [bitmask](https://en.wikipedia.org/wiki/Mask_(computing)). This option is going to save both memory and CPU, let's see how.
 
 
 ## Interlude: Numbers as Bits
 
-Compute store numbers as a sequence of bits. Every bit represents a number:
+Computers store numbers as a sequence of bits. Every bit represents a number:
 
 - First bit is 2⁰ = 1
 - Second bit is 2¹ = 2
@@ -96,122 +69,137 @@ Shifting left one place is like multiplying by 2.
 
 Using these operators we can do pretty complex logic. In our case we'll use them to set/unset bits and check if a bit is set.
 
-## Back to Permissions
+## Back to Our Keys
 
-We're going to redefine `DocumentPermissions` as a single byte.
+We need to support 3 keys, which means we need only 3 bits. However the smallest type we can use is a single `byte` which is 8 bits.
 
-**Listing 3: `DocumentPermissions` as byte**
-
+**Listing 1: Key type**
 ```
-3 // DocumentPermissions are permissions set on a document
-4 type DocumentPermissions uint8
-```
-
-Listing 3 shows the new type of `DocumentPermissions`.
-
-Next, we're going to define the permissions. Each will be a number with one distinct bit that is 1 and all the rest 0.
-
-**Listing 4: Permission values**
-
-```
-6  // Available permissions
-7  const (
-8      Locked DocumentPermissions = 1 << iota
-9      GroupReadable
-10     GroupWritable
-11     AllReadable
-12     AllWritable
-13 )
+8 // Key is a key in the game
+9 type Key byte
 ```
 
-Listing 4 shows the permissions. One line 8, we use `iota` to define the first permission which is `1<<0 = 1`. On lines 8 to 12, Go will carry the same operation and type for the rest of the values. This means `GroupReadable` will be `1<<1 = 2`, `GroupWritable` will be `1<<2 = 4` ...
+On line 9, we define the `Key` type as a bit (which is an alias to `uint8`)
 
-Next we'll define methods on `DocumentPermissions` to set/clear permissions and also to check if a permission is set.
-
-**Listing 5: Set**
+**Listing 2: The Keys**
 
 ```
-15 func (p *DocumentPermissions) Set(perm DocumentPermissions) {
-16     *p = *p | perm
-17 }
+11 const (
+12     Copper  Key = 1 << iota // 1
+13     Jade                    // 2
+14     Crystal                 // 4
+15     maxKey
+16 )
 ```
 
-Listing 5 shows how to set a permission. On line 16, we use bitwise-or (`|`) to set a permission bit.
+Listing 2 shows the available keys. On line 11, we start to define our keys. Using `iota` in the same `const` group will increment it automatically. On line 12, we define the value for the first key as `1 << iota` which is `1 << 0 = 1`. On line 13, `Jade` will have the value of `1 << 2 = 2`... On line 15, we define `maxKey` which is the maximal key value, this value is not exported.
 
-For example, if the current value of `p` is `00000010` and we'd like to set `Locked` which is `00000001` then
+In order to have nice string representation for our keys, we'll have it implement the [fmt.Stringer](https://golang.org/pkg/fmt/#Stringer) interface.
 
-```
-00000010
-00000001
---------
-000000011
-```
 
-**Listing 5: Clear**
+**Listing 2: String() implementation**
 
 ```
-19 func (p *DocumentPermissions) Clear(perm DocumentPermissions) {
-20     *p = *p & (^perm)
-21 }
+18 // String implements the fmt.Stringer interface
+19 func (k Key) String() string {
+20     if k >= maxKey {
+21         return fmt.Sprintf("<unknown key: %d>", k)
+22     }
+23 
+24     switch k {
+25     case Copper:
+26         return "copper"
+27     case Jade:
+28         return "jade"
+29     case Crystal:
+30         return "crystal"
+31     }
+32 
+33     // multiple keys
+34     var names []string
+35     for key := Copper; key < maxKey; key <<= 1 {
+36         if k&key != 0 {
+37             names = append(names, key.String())
+38         }
+39     }
+40     return strings.Join(names, "|")
+41 }
 ```
 
-Listing 5 shows how to clear a permission. On line 20, we first negate the bit (`^`) and then use bitwise and (`&`) with the current permission.
+Listing 3 shows the `String() string` method implementation. On line 20, we check that the value is valid. On lines 24 to 31, we return string value for a single key (bit) and on lines 34 to 40, we construct a string representation for multiple keys (bits).
 
-For example, if currently `Locked` and `GroupReadable` are set, then the value of `p` is `00000011`. We'd like to clear `Locked` so first we negate it:
+Now we're ready to use `Key` in our `Player` struct.
 
-```
-00000001
---------
-11111110
-```
-
-And then we do bitwise and with the current value of `p`:
+**Listing 4: Player struct**
 
 ```
-00000011
-11111110
---------
-00000010
+43 // Player is a player in the game
+44 type Player struct {
+45     Name string
+46     Keys Key
+47 }
 ```
 
-**Listing 6: IsSet**
+Listing 4 shows the `Player` struct implementation. On line 45, we have the player name and on line 46, we have the set of keys it holds. As the game is developed, we'll add more fields.
+
+**Listing 5: Adding a key**
 
 ```
-23 func (p DocumentPermissions) IsSet(perm DocumentPermissions) bool {
-24     return p&perm != 0
-25 }
+49 // AddKey adds a key to the player keys
+50 func (p *Player) AddKey(key Key) {
+51     p.Keys |= key
+52 }
 ```
 
-Listing 6 shows how to check if a permission is set. On line 24, we use a bitwise or (`|`) to check if a bit is set.
+Listing 5 shows adding a key. On line 51, we use bitwise OR to set the `key` bit in the `Keys` field.
 
-For example, if currently `Locked` and `GroupReadable` are set, then the value of `p` is `00000011`. Let's check against `Locked`:
-
-```
-00000011
-00000001
---------
-00000001
-```
-
-And if we check against `AnyReadable` which is `00001000` then
+**Listing 6: Checking for a Key**
 
 ```
-00000011
-00001000
---------
-00000000
+54 // HasKey returns true if player has a key
+55 func (p *Player) HasKey(key Key) bool {
+56     return p.Keys&key != 0
+57 }
 ```
+
+Listing 6 shows checking for a key. On line 56, we use bitwise AND to check if the key bit is set in the `Keys` field.
+
+**Listing 7: Removing a Key**
+
+```
+59 // RemoveKey removes key from player
+60 func (p *Player) RemoveKey(key Key) {
+61     p.Keys &= ^key
+62 }
+```
+
+Listing 7 shows removing a key. On line 61, we first use bitwise NOT to flip the `key` bits and then use bitwise AND to unset the key bit in the `Keys` field.
 
 ## Conclusion
 
-We managed to reduce the memory consumption of `DocumentPermissions` from 5 bytes to a single byte. It might not seem much, but as Dave Cheney [said](https://dave.cheney.net/2021/01/05/a-few-bytes-here-a-few-there-pretty-soon-youre-talking-real-memory) "A few bytes here, a few there, pretty soon you’re talking real memory."
+Go's type system allows you to combine low level code such as bitmasks with high level code such as methods to give you both performance and user friendly code.
 
-This technique is well established and is called bitmask, see more [on Wikipedia](https://en.wikipedia.org/wiki/Mask_(computing)).
+How much did we save? I wrote [a benchmark](https://github.com/353words/bitmask/blob/master/bench_test.go) that checks the three approaches: using a `[]string`, using a `map[string]bool` and using our `byte` based implementation.
 
-What's nice about Go's type system is that it allows you to combine low level code such as bitmasks with high level code such as methods to give you both performance and user friendly code.
+**Listing 8: Running the benchmark**
+
+```
+01 $ go test -bench . -benchmem
+02 goos: linux
+03 goarch: amd64
+04 pkg: github.com/353words/bitmask
+05 cpu: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz
+06 BenchmarkMap-4      	249177445	         4.800 ns/op	       0 B/op	       0 allocs/op
+07 BenchmarkSlice-4    	243485120	         4.901 ns/op	       0 B/op	       0 allocs/op
+08 BenchmarkBits-4     	1000000000	         0.2898 ns/op	       0 B/op	       0 allocs/op
+09 BenchmarkMemory-4   	21515095	        52.25 ns/op	      32 B/op	       1 allocs/op
+10 PASS
+11 ok  	github.com/353words/bitmask	4.881s
+```
+
+Listing 8 shows the results of the benchmark on my machine. On line 1, we run the benchmark with the `-benchmem` flag to benchmark memory allocations. On lines 06-09, we see that our `byte` based implementation is about 16 times faster than the alternatives. On line 09, we see that allocating `[]string{"copper", "jade"}` consumes 32 bytes, which is 32 times more memory than our single byte implementation.
+
+_Note: You should optimize *only* after you have performance requirements and you have profiled your application. See the [Rules Of Optimization Club](https://wiki.c2.com/?RulesOfOptimizationClub) for more great advice._
 
 What tricks did you use to reduce memory? I'd love to hear your stories, ping me at miki@353solutions.com
-
 The code for this blog post can be found [on GitHub](https://github.com/353words/bitmask).
-
-
