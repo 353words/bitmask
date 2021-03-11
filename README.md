@@ -23,7 +23,7 @@ Every bit represents a “power of two” number. The first bit (called LSB - le
 
 
 When we want to represent a number, say 27. We break it to powers of two.
-27 = 1(20) + 2(21) + 8(23) + 16(24)
+27 = 1(2⁰) + 2(2¹) + 8(2³) + 16(2⁴)
 
 We set the bits in the positions we use to 1, making the binary representation of 27 in binary is to 00011011.
 
