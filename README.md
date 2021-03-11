@@ -1,28 +1,36 @@
 # Using Bitmasks
 
-You a write server for massively multiplayer online role-playing game ([MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game)).
+You write a server for a massively multiplayer online role-playing game ([MMORPG](https://en.wikipedia.org/wiki/Massively_multiplayer_online_role-playing_game)).
 
 In the game, players collect keys and you want to design how to store the set of keys each player has.
 
-Say the keys are `copper`, `jade` and `crystal`. You consider the following options for storing a player key set:
+As an example, imagine the set of keys are `copper`, `jade` and `crystal`. You consider the following options for storing a player key set:
+
 - A `[]string`
 - A `map[string]bool`
 
-After considering both options, you decide on a third one - a [bitmask](https://en.wikipedia.org/wiki/Mask_(computing)). This option is going to save both memory and CPU, let's see how.
+Both options will work, but did you consider a third option of using a [bitmask](https://en.wikipedia.org/wiki/Mask_(computing)). Using a bitmask will make storing and processing keys more efficient. Once you learn the mechanics, it will be readable and maintainable as well.
 
+Let’s see how.
 
 ## Interlude: Numbers as Bits
 
-Computers store numbers as a sequence of bits. Every bit represents a number:
+Let’s start off with the understanding that computers store numbers as a sequence of 8 bits called a byte, where every byte represents a number.
 
-- First bit is 2⁰ = 1
-- Second bit is 2¹ = 2
-- Third bit is 2² = 4
-- Fourth bit is 2³ = 8
-- ...
+Every bit represents a “power of two” number. The first bit (called LSB - least significant bit) is 20 = 1, the second is 21 = 2 and so fourth until the last (called MSB = most significant bit) which is 27 = 128.
 
-To construct the number 6 we'll represent is at 4(2²) + 2(2¹).
-For an 8 bit number, we're using the bit representation of `00000110`. There the smallest bit (2⁰ also called LSB - least significant bit) is on the right. We say a bit is "set" is it's value is 1, in 6 the second and third bits are set.
+![](bytes.png)
+
+
+When we want to represent a number, say 27. We break it to powers of two.
+27 = 1(20) + 2(21) + 8(23) + 16(24)
+
+We set the bits in the positions we use to 1, making the binary representation of 27 in binary is to 00011011.
+
+![](27-bits.png)
+
+
+The highest number we can represent in a single byte is: 1+2+4+8+16+32+64+128=255
 
 _Note: A fun exercise with kids is to teach them to count up to 31 on one hand. Each finger is a bit, where the pinky is 1 and the thumb is 16. Let them giggle at 4 :)_
 
@@ -203,3 +211,5 @@ _Note: You should optimize *only* after you have performance requirements and yo
 
 What tricks did you use to reduce memory? I'd love to hear your stories, ping me at miki@353solutions.com
 The code for this blog post can be found [on GitHub](https://github.com/353words/bitmask).
+
+
