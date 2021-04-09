@@ -17,7 +17,7 @@ Let’s see how.
 
 Let’s start off with the understanding that computers store numbers as a sequence of 8 bits called a byte, where every byte represents a number.
 
-Every bit represents a “power of two” number. The first bit (called LSB - least significant bit) is 20 = 1, the second is 21 = 2 and so fourth until the last (called MSB = most significant bit) which is 27 = 128.
+Every bit represents a “power of two” number. The first bit (called LSB - least significant bit) is 2⁰ = 1, the second is 2¹ = 2 and so fourth until the last (called MSB = most significant bit) which is 2⁷ = 128.
 
 ![](bytes.png)
 

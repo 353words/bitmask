@@ -26,7 +26,7 @@ func cHasKey(key string) bool {
 	return false
 }
 
-func bHasKey(key Key) bool {
+func bHasKey(key KeySet) bool {
 	return bKeys&key != 0
 }
 

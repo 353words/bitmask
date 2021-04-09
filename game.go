@@ -5,18 +5,18 @@ import (
 	"strings"
 )
 
-// Key is a key in the game
-type Key byte
+// KeySet is a set of keys in the game
+type KeySet byte
 
 const (
-	Copper  Key = 1 << iota // 1
-	Jade                    // 2
-	Crystal                 // 4
+	Copper  KeySet = 1 << iota // 1
+	Jade                       // 2
+	Crystal                    // 4
 	maxKey
 )
 
 // String implements the fmt.Stringer interface
-func (k Key) String() string {
+func (k KeySet) String() string {
 	if k >= maxKey {
 		return fmt.Sprintf("<unknown key: %d>", k)
 	}
@@ -43,20 +43,20 @@ func (k Key) String() string {
 // Player is a player in the game
 type Player struct {
 	Name string
-	Keys Key
+	Keys KeySet
 }
 
 // AddKey adds a key to the player keys
-func (p *Player) AddKey(key Key) {
+func (p *Player) AddKey(key KeySet) {
 	p.Keys |= key
 }
 
 // HasKey returns true if player has a key
-func (p *Player) HasKey(key Key) bool {
+func (p *Player) HasKey(key KeySet) bool {
 	return p.Keys&key != 0
 }
 
 // RemoveKey removes key from player
-func (p *Player) RemoveKey(key Key) {
+func (p *Player) RemoveKey(key KeySet) {
 	p.Keys &= ^key
 }
