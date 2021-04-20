@@ -1,4 +1,4 @@
-# Using Bitmasks in Go
+# Using Bitmasks In Go
 
 ### Introduction
 
@@ -76,7 +76,7 @@ OR (`|`) is true if one of the bits is 1:
 0 | 0 -> 0 (false)
 0 | 1 -> 1 (true)
 1 | 0 -> 1 (true)
-1 | 1 -> 0 (false)
+1 | 1 -> 0 (true)
 ```
 
 NOT (`^`) reverses the bit:
@@ -577,5 +577,3 @@ _Note: You should optimize *only* after you have performance requirements and yo
 
 What tricks did you use to reduce memory? I'd love to hear your stories, ping me at miki@353solutions.com
 The code for this blog post can be found [on GitHub](https://github.com/353words/bitmask).
-
-
